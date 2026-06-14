@@ -1,121 +1,227 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'core/di/injection_container.dart';
+import 'features/chat/presentation/bloc/chat_bloc.dart';
+import 'features/conference_members/presentation/bloc/conference_members_bloc.dart';
+import 'features/payment/presentation/bloc/payment_bloc.dart';
+import 'features/task_board/presentation/bloc/task_board_bloc.dart';
+import 'startup/startup_config.dart';
+import 'startup/startup_runner.dart';
 
 void main() {
-  runApp(const MyApp());
+  // Wrap the entire app in a zone for error handling
+  runZonedGuarded(
+    () {
+      // Configure Flutter error handling
+      FlutterError.onError = _handleFlutterError;
+
+      // Run the startup pipeline
+      _runApp();
+    },
+    _handleZoneError,
+  );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+/// Runs the startup pipeline and launches the app.
+///
+/// This method orchestrates the complete startup sequence including:
+/// - Flutter bindings initialization
+/// - Dependency injection configuration
+/// - Session restoration
+/// - Database initialization
+/// - Error reporting setup
+/// - App launch
+Future<void> _runApp() async {
+  final startupRunner = StartupRunner(
+    config: StartupConfig.load(),
+    appBuilder: (getIt) => _buildApp(getIt),
+  );
 
-  // This widget is the root of your application.
+  final appWidget = await startupRunner.run();
+
+  runApp(appWidget);
+}
+
+/// Builds the application widget with BlocObserver.
+///
+/// This method creates the MaterialApp with all necessary providers
+/// and observers for state management and error tracking.
+Widget _buildApp(GetIt getIt) {
+  return MaterialApp(
+    title: 'Error Handler Project',
+    debugShowCheckedModeBanner: false,
+    theme: ThemeData(
+      colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+      useMaterial3: true,
+    ),
+    // TODO: Add proper routing with go_router
+    // For now, showing a placeholder home screen
+    home: const _HomeScreen(),
+  );
+}
+
+/// Handles Flutter framework errors.
+///
+/// This callback is called when a Flutter framework error occurs.
+/// In production, this would log the error to a crash reporting service.
+void _handleFlutterError(FlutterErrorDetails details) {
+  // In development, print to console
+  debugPrint('Flutter Error: ${details.exception}');
+  debugPrint('Stack trace: ${details.stack}');
+
+  // In production, send to crash reporting service
+  // Example: FirebaseCrashlytics.instance.recordError(...)
+}
+
+/// Handles zone errors that escape Flutter's error handling.
+///
+/// This callback is called when an error occurs in the zone that
+/// wasn't caught by Flutter's error handling.
+void _handleZoneError(Object error, StackTrace stackTrace) {
+  // In development, print to console
+  debugPrint('Zone Error: $error');
+  debugPrint('Stack trace: $stackTrace');
+
+  // In production, send to crash reporting service
+  // Example: FirebaseCrashlytics.instance.recordError(...)
+}
+
+/// Placeholder home screen.
+///
+/// This is a temporary screen until proper routing is implemented.
+/// In production, this would be replaced with the actual app navigation.
+class _HomeScreen extends StatelessWidget {
+  const _HomeScreen();
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Error Handler Project'),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          _FeatureCard(
+            title: 'Chat',
+            description: 'Offline-first chat with WebSocket and REST fallback',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => BlocProvider(
+                    create: (_) => getIt<ChatBloc>(),
+                    child: const _PlaceholderScreen(title: 'Chat'),
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+          _FeatureCard(
+            title: 'Payment',
+            description: 'Payment processing with user context',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => BlocProvider(
+                    create: (_) => getIt<PaymentBloc>(),
+                    child: const _PlaceholderScreen(title: 'Payment'),
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+          _FeatureCard(
+            title: 'Task Board',
+            description: 'Kanban board with optimistic updates and rollback',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => BlocProvider(
+                    create: (_) => getIt<TaskBoardBloc>(),
+                    child: const _PlaceholderScreen(title: 'Task Board'),
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+          _FeatureCard(
+            title: 'Conference Members',
+            description: 'Participant management with search and mute',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => BlocProvider(
+                    create: (_) => getIt<ConferenceMembersBloc>(),
+                    child: const _PlaceholderScreen(title: 'Conference Members'),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
+/// Feature card for the home screen.
+class _FeatureCard extends StatelessWidget {
   final String title;
+  final String description;
+  final VoidCallback onTap;
 
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+  const _FeatureCard({
+    required this.title,
+    required this.description,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    return Card(
+      elevation: 2,
+      child: ListTile(
+        title: Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        subtitle: Text(description),
+        trailing: const Icon(Icons.arrow_forward_ios),
+        onTap: onTap,
+      ),
+    );
+  }
+}
+
+/// Placeholder screen for features.
+///
+/// This is a temporary screen until proper feature screens are implemented.
+class _PlaceholderScreen extends StatelessWidget {
+  final String title;
+
+  const _PlaceholderScreen({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
+        title: Text(title),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
-          children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+        child: Text(
+          '$title feature coming soon',
+          style: Theme.of(context).textTheme.headlineSmall,
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }
