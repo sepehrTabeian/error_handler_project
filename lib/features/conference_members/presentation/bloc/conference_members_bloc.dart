@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/conference_participant_entity.dart';
+import '../../domain/entities/result.dart';
 import '../../domain/usecases/get_conference_participants_usecase.dart';
 import '../../domain/usecases/update_participant_mute_status_usecase.dart';
 import 'conference_members_event.dart';
@@ -85,7 +86,7 @@ class ConferenceMembersBloc
   /// Always create a new Set from the existing one.
   /// 
   /// Correct:
-  /// final updatedSelectedIds = Set<String>.from(state.selectedParticipantIds);
+  /// final updatedSelectedIds = Set&lt;String&gt;.from(state.selectedParticipantIds);
   /// 
   /// Wrong:
   /// state.selectedParticipantIds.add(id);

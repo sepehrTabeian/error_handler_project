@@ -32,7 +32,7 @@ class ConferenceMembersLoading extends ConferenceMembersState {
 /// 
 /// Why Set is used for selected IDs:
 /// - Checking whether a user is selected should be O(1) average
-/// - Avoid using List<String> for selected IDs because List.contains is O(n)
+/// - Avoid using List&lt;String&gt; for selected IDs because List.contains is O(n)
 /// - This matters when there are many participants
 /// - Set provides efficient add, remove, and contains operations
 /// 

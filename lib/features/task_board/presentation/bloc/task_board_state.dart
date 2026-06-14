@@ -27,9 +27,9 @@ class TaskBoardLoading extends TaskBoardState {
 
 /// Loaded state containing the task board data.
 /// 
-/// Uses Map<TaskStatus, List<TaskEntity>> for efficient column-based access.
+/// Uses Map&lt;TaskStatus, List&lt;TaskEntity&gt;&gt; for efficient column-based access.
 /// 
-/// Why Map<TaskStatus, List<TaskEntity>>?
+/// Why Map&lt;TaskStatus, List&lt;TaskEntity&gt;&gt;?
 /// - UI needs tasks grouped by column (Todo, In Progress, Done)
 /// - Avoids filtering a full task list on every rebuild
 /// - Each column can directly access board[TaskStatus.todo], etc.

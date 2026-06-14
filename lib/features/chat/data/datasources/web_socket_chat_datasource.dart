@@ -64,8 +64,8 @@ class WebSocketChatDataSource implements ChatSocketDataSource {
 
     final uri = Uri.parse(socketUrl).replace(
       queryParameters: {
-        if (token != null) 'token': token,
-      },
+        'token': token,
+      }..removeWhere((key, value) => value == null),
     );
 
     _channel = WebSocketChannel.connect(uri);

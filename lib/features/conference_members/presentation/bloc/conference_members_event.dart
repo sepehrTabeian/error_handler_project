@@ -50,7 +50,7 @@ class ConferenceMembersSearchChanged extends ConferenceMembersEvent {
 /// Always create a new Set from the existing one.
 /// 
 /// Correct:
-/// final updatedSelectedIds = Set<String>.from(state.selectedParticipantIds);
+/// final updatedSelectedIds = Set&lt;String&gt;.from(state.selectedParticipantIds);
 /// 
 /// Wrong:
 /// state.selectedParticipantIds.add(id);

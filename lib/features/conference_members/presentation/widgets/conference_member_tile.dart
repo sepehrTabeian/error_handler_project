@@ -74,7 +74,7 @@ class ConferenceMemberTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: _getRoleColor(participant.role).withOpacity(0.2),
+        color: _getRoleColor(participant.role).withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: _getRoleColor(participant.role),
